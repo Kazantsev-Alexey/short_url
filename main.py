@@ -107,8 +107,7 @@ def shorten_url(data: ShortenRequest, request: Request):
         if cur.fetchone():
             raise HTTPException(status_code=400, detail="Alias already taken")
         
-        
-        #пробуем вставить запись, но если такая ссылка уже есть, возвращаем по ней запись
+        # пробуем вставить запись, но если такая ссылка уже есть, возвращаем по ней запись
         try:
             cur.execute(
                 "INSERT INTO urls (original_url, short_code, expires_at, user_id) VALUES (%s, %s, %s, %s)",
@@ -122,15 +121,17 @@ def shorten_url(data: ShortenRequest, request: Request):
                 )
                 rows = cur2.fetchall()
 
+            base_url = str(request.base_url)
             return [
                 {
                     "original_url": row[0],
-                    "short_code": row[1]
+                    "short_url": f"{base_url}{row[1]}"
                 }
                 for row in rows
             ]
 
-    return {"short_url": f"http://localhost:8000/{short_code}"}
+    base_url = str(request.base_url)
+    return {"short_url": f"{base_url}{short_code}"}
 
 @app.get("/{short_code}")
 # перенаправляем на нужный адрес
