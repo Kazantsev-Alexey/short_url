@@ -8,14 +8,14 @@ import shortuuid
 import os
 import redis
 
-
-r = redis.Redis(
-    host=os.getenv("REDIS_HOST"),
-    port=int(os.getenv("REDIS_PORT")),
-    password=os.getenv("REDIS_PASSWORD"),
-    ssl=True,
-    decode_responses=True
-)
+def get_redis():
+    return redis.Redis(
+        host=os.getenv("REDIS_HOST"),
+        port=int(os.getenv("REDIS_PORT")),
+        password=os.getenv("REDIS_PASSWORD"),
+        ssl=True,
+        decode_responses=True
+    )
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 conn = psycopg2.connect(DATABASE_URL)
@@ -91,6 +91,7 @@ def register(data: RegisterRequest):
 # определяем хост с помощью Request
 def shorten_url(data: ShortenRequest, request: Request):
     # добавляем генерацию короткого кода, если алиас не передан
+    
     user_id = None
     if data.username:
         with conn.cursor() as cur:
@@ -137,6 +138,7 @@ def shorten_url(data: ShortenRequest, request: Request):
 # перенаправляем на нужный адрес
 def redirect(short_code: str):
     # смотрим кэш и обновляем стату посещаемости
+    r = get_redis() # обновляем редис
     cached_url = r.get(short_code)
     if cached_url:
         with conn.cursor() as cur:
@@ -212,6 +214,7 @@ def search(original_url: str):
 @app.put("/links/{short_code}")
 # обновляем ссылку с проверкой авторизации
 def update(short_code: str, data: UpdateRequest, user=Depends(get_current_user)):
+    r = get_redis()
     with conn.cursor() as cur:
         cur.execute("SELECT user_id FROM urls WHERE short_code = %s", (short_code,))
         row = cur.fetchone()
@@ -227,6 +230,7 @@ def update(short_code: str, data: UpdateRequest, user=Depends(get_current_user))
 @app.delete("/links/{short_code}")
 # удаляем ссылку с проверкой авторизации
 def delete(short_code: str, user=Depends(get_current_user)):
+    r = get_redis()
     with conn.cursor() as cur:
         cur.execute("SELECT user_id FROM urls WHERE short_code = %s", (short_code,))
         row = cur.fetchone()
