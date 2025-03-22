@@ -8,6 +8,10 @@ import shortuuid
 import os
 import redis
 
+print("REDIS_HOST:", os.getenv("REDIS_HOST"))
+print("REDIS_PORT:", os.getenv("REDIS_PORT"))
+print("SSL mode: ENABLED")
+
 def get_redis():
     return redis.Redis(
         host=os.getenv("REDIS_HOST"),
