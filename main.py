@@ -16,7 +16,6 @@ r = redis.Redis(
     ssl=True,
     decode_responses=True
 )
-r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 conn = psycopg2.connect(DATABASE_URL)
