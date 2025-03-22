@@ -8,16 +8,13 @@ import shortuuid
 import os
 import redis
 
-print("REDIS_HOST:", os.getenv("REDIS_HOST"))
-print("REDIS_PORT:", os.getenv("REDIS_PORT"))
-print("SSL mode: ENABLED")
 
 def get_redis():
     return redis.Redis(
         host=os.getenv("REDIS_HOST"),
         port=int(os.getenv("REDIS_PORT")),
         password=os.getenv("REDIS_PASSWORD"),
-        ssl=True,
+        ssl=False, # бесплатный план не предназначен для SSL
         decode_responses=True
     )
 
